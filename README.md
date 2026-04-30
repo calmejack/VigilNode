@@ -1,4 +1,4 @@
-# P2PCamera
+# VigilNode
 
 A production-ready Android surveillance camera app that streams video and audio over WebRTC on a private network (Tailscale / LAN) — **no cloud backend, no external signaling server**.
 

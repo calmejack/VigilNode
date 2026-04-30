@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">P2P Camera</string>
+
+    <!-- Status strings -->
+    <string name="status_waiting">Waiting for viewer…</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_connected">Connected – streaming</string>
+    <string name="status_stopped">Service stopped</string>
+    <string name="status_permissions_denied">Permissions denied – cannot start</string>
+
+    <!-- Recording strings -->
+    <string name="recording_idle">Recording idle</string>
+
+    <!-- Button labels -->
+    <string name="btn_start">Start</string>
+    <string name="btn_stop">Stop Service</string>
+</resources>

@@ -27,7 +27,8 @@ app/src/main/java/com/example/cameraapp/
 │   ├── CameraXVideoCapturer.kt – bridges CameraX frames → WebRTC pipeline
 │   └── SimpleSdpObserver.kt  – SdpObserver convenience base class
 ├── signaling/
-│   └── SignalingServer.kt    – Embedded WebSocket server (Java-WebSocket)
+│   ├── SignalingServer.kt    – Embedded WebSocket server (Java-WebSocket)
+│   └── SignalingClient.kt    – WebSocket client (OkHttp) for external signaling servers
 ├── service/
 │   └── CameraService.kt      – Foreground LifecycleService (wires all components)
 ├── recording/
@@ -63,6 +64,8 @@ app/src/main/java/com/example/cameraapp/
 
 ## Connecting a Viewer
 
+### Using Embedded Signaling Server (Default)
+
 1. Ensure the viewer and the Android device are on the same **Tailscale network** (or LAN).
 2. Note the device's IP address shown in the app UI.
 3. Open the viewer HTML page and connect to:
@@ -70,6 +73,61 @@ app/src/main/java/com/example/cameraapp/
    ws://<device-ip>:8080
    ```
 4. Send an SDP offer – the device will reply with an SDP answer and ICE candidates.
+
+### Using External Signaling Server (SignalingClient)
+
+The app also includes a **SignalingClient** that can connect to an external WebSocket signaling server instead of running an embedded server on the device.
+
+#### Example Usage:
+
+```kotlin
+// In CameraService.kt or similar
+val signalingClient = SignalingClient(
+    serverUrl = "ws://your-signaling-server.com:8080",
+    onOffer = { sdp ->
+        // Handle incoming offer from remote peer
+        webRTCManager.createPeerConnection()
+        webRTCManager.handleOffer(sdp)
+    },
+    onAnswer = { sdp ->
+        // Handle incoming answer from remote peer
+        val remoteDescription = SessionDescription(SessionDescription.Type.ANSWER, sdp)
+        webRTCManager.handleAnswer(remoteDescription)
+    },
+    onIceCandidate = { sdpMid, sdpMLineIndex, sdp ->
+        // Handle incoming ICE candidate
+        webRTCManager.addIceCandidate(IceCandidate(sdpMid, sdpMLineIndex, sdp))
+    }
+)
+
+// Configure WebRTC callbacks
+webRTCManager.onIceCandidate = { candidate ->
+    signalingClient.sendIceCandidate(
+        candidate.sdpMid ?: "",
+        candidate.sdpMLineIndex,
+        candidate.sdp
+    )
+}
+webRTCManager.onLocalDescription = { sessionDescription ->
+    when (sessionDescription.type) {
+        SessionDescription.Type.OFFER -> signalingClient.sendOffer(sessionDescription.description)
+        SessionDescription.Type.ANSWER -> signalingClient.sendAnswer(sessionDescription.description)
+        else -> {}
+    }
+}
+
+// Connect to server
+signalingClient.connect()
+
+// Disconnect when done
+signalingClient.disconnect()
+```
+
+#### Features:
+- **Automatic reconnection** with exponential backoff
+- **Keep-alive pings** every 30 seconds
+- **Connection state monitoring** via `connectionState` Flow
+- Supports both offer/answer patterns (camera as offerer or answerer)
 
 ### Signaling Message Protocol
 

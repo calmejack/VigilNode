@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launcher foreground: camera icon on transparent background -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M71.5,42.75V31.5c0,-2.49 -2.01,-4.5 -4.5,-4.5H18
+                          c-2.49,0 -4.5,2.01 -4.5,4.5v45c0,2.49 2.01,4.5 4.5,4.5h49.5
+                          c2.49,0 4.5,-2.01 4.5,-4.5V65.25L90,81V27L71.5,42.75z" />
+
+</vector>
